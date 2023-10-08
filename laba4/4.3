@@ -1,0 +1,198 @@
+using laba4._3;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Text;
+using System.Threading.Tasks;
+/*Используйте класс Car из задания №2, на его основе создайте класс CarCatalor, содержащий массив элементов типа Car. 
+Для класса CarCatalog реализуйте возможность итерации по элементам массива Car с помощью оператора foreach различными способами: 
+1Прямой проход с первого элемента до последнего.
+2Обратный проход от последнего к первому.
+3Проход по элементам массива с фильтром по году выпуска.
+4Проход по элементам массива с фильтром по максимальной скорости.
+Примечание: для выполнения задания необходимо реализовать различные итераторы, используя конструкцию yield return.
+Для п.3 и 4, итератор должен принимать год выпуска и скорость как параметр, 
+чтобы возвращать только те элементы коллекции, которые удовлетворяют условию.
+
+*/
+
+namespace laba4._3
+{
+    public class Car
+    {
+        
+        public string Name { get; set; }
+        public string ProductionYear { get; set; }
+        public string MaxSpeed { get; set; }
+        
+        public Car(string name,string prodyear,string maxspeed) 
+        { 
+            Name = name;
+            ProductionYear = prodyear;
+            MaxSpeed = maxspeed;
+        }  
+    } 
+}
+public class CarNameComp : IComparer<Car>
+{    
+       public int Compare(Car a, Car b)
+        {
+            {
+                if (a.Name[0] == b.Name[0])
+                {
+                    return 0;
+                }
+                else if (a.Name[0] < b.Name[0])
+
+                {
+                    return -1;
+                }
+                else if (a.Name[0] > b.Name[0])
+
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 266711001;
+                }
+            }        
+    }
+}
+public class CarYearComp : IComparer<Car>
+{
+    public int Compare(Car a, Car b)
+    {
+        {
+            if (Convert.ToInt32(a.ProductionYear) == Convert.ToInt32(b.ProductionYear))
+            {
+                return 0;
+            }
+            else if (Convert.ToInt32(a.ProductionYear) < Convert.ToInt32(b.ProductionYear))
+
+            {
+                return -1;
+            }
+            else if (Convert.ToInt32(a.ProductionYear) > Convert.ToInt32(b.ProductionYear))
+
+            {
+                return 1;
+            }
+            else
+            {
+                return 266711001;
+            }
+        }
+    }
+}
+public class CarSpeedComp : IComparer<Car>
+{
+    public int Compare(Car a, Car b)
+    {
+        {
+            if (Convert.ToInt32(a.MaxSpeed) == Convert.ToInt32(b.MaxSpeed))
+            {
+                return 0;
+            }
+            else if (Convert.ToInt32(a.MaxSpeed) < Convert.ToInt32(b.MaxSpeed))
+
+            {
+                return -1;
+            }
+            else if (Convert.ToInt32(a.MaxSpeed) > Convert.ToInt32(b.MaxSpeed))
+
+            {
+                return 1;
+            }
+            else
+            {
+                return 266711001;
+            }
+        }
+    }
+}
+public class CarsCatalog
+{
+    public List<Car> cars;
+    public CarsCatalog()
+    {
+        cars = new List<Car>();
+    }
+    public void AddCar(Car car)
+    {
+        cars.Add(car);
+    }
+
+    public IEnumerable<Car> Carsvpered(List<Car> cars)//прямой
+    {
+        foreach (Car car in cars)
+        {
+            yield return car;
+        }
+    }
+    public IEnumerable<Car> Carsnazad(List<Car> cars)//прямой
+    {
+        cars.Reverse();
+        foreach (Car car in cars)
+        {
+            yield return car;
+        }
+    }
+    public IEnumerable<Car> Cars_speed(List<Car> cars)
+    {
+        CarSpeedComp carSpeedComp = new CarSpeedComp();
+        cars.Sort(carSpeedComp);
+        foreach (Car car in cars)
+        {
+            yield return car;
+        }
+    }
+    public IEnumerable<Car> Cars_year(List<Car> cars)
+    {
+        CarYearComp carYearComp = new CarYearComp();
+        cars.Sort(carYearComp);
+        foreach (Car car in cars)
+        {
+            yield return car;
+        }
+    }
+}
+internal class Program
+    {
+        static void Main(string[] args)
+        {
+            List<Car> list = new List<Car>
+            {
+                new Car("Toyota", "2004", "3401"),
+                new Car("Ferrari", "2003", "340"),
+                new Car("Aerrari", "2001", "30")
+            };
+          CarsCatalog catalog = new CarsCatalog();
+
+        Console.WriteLine("Прямой проход:");
+        foreach (Car car in catalog.Carsvpered(list))
+        {
+            Console.WriteLine($"{car.Name} \t {car.MaxSpeed} \t {car.ProductionYear}");
+        }
+
+        Console.WriteLine("Обратный проход:");
+        foreach (Car car in catalog.Carsnazad(list))
+        {
+            Console.WriteLine($"{car.Name} \t {car.MaxSpeed} \t {car.ProductionYear}");
+        }
+
+        Console.WriteLine("Сортировка по максимальной скорости:");
+        foreach (Car car in catalog.Cars_speed(list))
+        {
+            Console.WriteLine($"{car.Name} \t {car.MaxSpeed} \t {car.ProductionYear}");
+        }
+
+        Console.WriteLine("Сортировка по году выпуска:");
+        foreach (Car car in catalog.Cars_year(list))
+        {
+            Console.WriteLine($"{car.Name} \t {car.MaxSpeed} \t {car.ProductionYear}");
+        }
+    }
+ }
