@@ -1,0 +1,148 @@
+using laba4._2;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Text;
+using System.Threading.Tasks;
+
+
+namespace laba4._2
+{
+
+    public class Car
+    {
+        
+        public string Name { get; set; }
+        public string ProductionYear { get; set; }
+        public string MaxSpeed { get; set; }
+        
+        public Car(string name,string prodyear,string maxspeed) 
+        { 
+            Name = name;
+            ProductionYear = prodyear;
+            MaxSpeed = maxspeed;
+        }  
+    } 
+}
+public class CarNameComp : IComparer<Car>
+{    
+       public int Compare(Car a, Car b)
+        {
+            {
+                if (a.Name[0] == b.Name[0])
+                {
+                    return 0;
+                }
+                else if (a.Name[0] < b.Name[0])
+
+                {
+                    return -1;
+                }
+                else if (a.Name[0] > b.Name[0])
+
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 266711001;
+                }
+            }        
+    }
+}
+public class CarYearComp : IComparer<Car>
+{
+    public int Compare(Car a, Car b)
+    {
+        {
+            if (Convert.ToInt32(a.ProductionYear) == Convert.ToInt32(b.ProductionYear))
+            {
+                return 0;
+            }
+            else if (Convert.ToInt32(a.ProductionYear) < Convert.ToInt32(b.ProductionYear))
+
+            {
+                return -1;
+            }
+            else if (Convert.ToInt32(a.ProductionYear) > Convert.ToInt32(b.ProductionYear))
+
+            {
+                return 1;
+            }
+            else
+            {
+                return 266711001;
+            }
+        }
+    }
+}
+public class CarSpeedComp : IComparer<Car>
+{
+    public int Compare(Car a, Car b)
+    {
+        {
+            if (Convert.ToInt32(a.MaxSpeed) == Convert.ToInt32(b.MaxSpeed))
+            {
+                return 0;
+            }
+            else if (Convert.ToInt32(a.MaxSpeed) < Convert.ToInt32(b.MaxSpeed))
+
+            {
+                return -1;
+            }
+            else if (Convert.ToInt32(a.MaxSpeed) > Convert.ToInt32(b.MaxSpeed))
+
+            {
+                return 1;
+            }
+            else
+            {
+                return 266711001;
+            }
+        }
+    }
+}
+internal class Program
+    {
+    static void Main(string[] args)
+    {
+        List<Car> list = new List<Car>
+        {
+            new Car("Toyota", "2004", "3401"),
+            new Car("Ferrari", "2003", "340"),
+            new Car("Aerrari", "2001", "30")
+        };
+        
+        CarNameComp carNameComp = new CarNameComp();
+        CarSpeedComp carSpeedComp = new CarSpeedComp();
+        CarYearComp carYearComp = new CarYearComp();
+       
+        list.Sort(carNameComp);
+        Console.WriteLine("carNameComp");
+        for( int i = 0; i < list.Count; i++ )
+        {
+            Console.WriteLine(list[i].Name);
+            Console.WriteLine(list[i].ProductionYear);
+            Console.WriteLine(list[i].MaxSpeed);
+        }
+        list.Sort(carSpeedComp);
+        Console.WriteLine("carSpeedComp");
+        for (int i = 0; i < list.Count; i++)
+        {
+            Console.WriteLine(list[i].Name);
+            Console.WriteLine(list[i].ProductionYear);
+            Console.WriteLine(list[i].MaxSpeed);
+        }
+        list.Sort(carYearComp);
+        Console.WriteLine("carYearComp");
+        for (int i = 0; i < list.Count; i++)
+        {
+            Console.WriteLine(list[i].Name);
+            Console.WriteLine(list[i].ProductionYear);
+            Console.WriteLine(list[i].MaxSpeed);
+        }
+    }
+    }
+
