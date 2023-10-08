@@ -1,0 +1,118 @@
+using System; 
+using System.Collections.Generic; 
+using System.Linq; 
+using System.Text; 
+using System.Threading.Tasks; 
+/*Задание№1 
+Создайте структуру Vector с тремя полями X, Y и Z.  
+Для созданной структуры переопределите операторы сложения векторов, умножения векторов, умножения вектора на число, а также логические операторы. 
+    Для логических операторов используйте сравнение по длине от начала координат. 
+*/ 
+namespace laba3._1
+{
+    class Vector
+    {
+        int x { get; set; }
+        int y { get; set; }
+        int z { get; set; }
+
+        public Vector(int x, int y, int z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        public static void print(Vector v)
+        {
+            Console.WriteLine($"{v.x} {v.y} {v.z}");
+        }
+        public static Vector operator +(Vector v1, Vector v2)//сложение 
+        {
+            return new Vector(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+        }
+        public static Vector operator *(Vector v1, Vector v2)//умножение 
+        {
+            return new Vector(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+        }
+        public static Vector operator *(Vector v1, int constanta)//умножение 
+        {
+            return new Vector(v1.x * constanta, v1.y * constanta, v1.z * constanta);
+        }
+        public static Vector operator *( int constanta,Vector v1)//умножение 
+        {
+            return new Vector(v1.x * constanta, v1.y * constanta, v1.z * constanta);
+        }
+
+        public static double dlina(Vector v1)
+        {
+            return Math.Sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+
+        }
+        public static bool operator ==(Vector v1, Vector v2)
+        {
+            if (ReferenceEquals(dlina(v1), null) && ReferenceEquals(dlina(v2), null))
+            {
+                return true;
+            }
+            if (ReferenceEquals(dlina(v1), null) || ReferenceEquals(dlina(v2), null))
+            {
+                return false;
+            }
+            return dlina(v1) == dlina(v2);
+        }
+        public static bool operator !=(Vector v1, Vector v2)
+        {
+            if (ReferenceEquals(dlina(v1), null))
+            {
+                return !ReferenceEquals(dlina(v2), null);
+            }
+            return !dlina(v1).Equals(dlina(v2));
+        }
+        public static bool operator >(Vector v1, Vector v2)
+        {
+            return dlina(v1) > dlina(v2);
+        }
+        public static bool operator >=(Vector v1, Vector v2)
+        {
+            return dlina(v1) >= dlina(v2);
+        }
+        public static bool operator <(Vector v1, Vector v2)
+        {
+            return !(dlina(v1) > dlina(v2));
+        }
+        public static bool operator <=(Vector v1, Vector v2)
+        {
+            return dlina(v1) <= dlina(v2);
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Vector v1 = new Vector(1, 2, 3);
+            Vector v2 = new Vector(4, 5, 6);
+            Vector v4 = new Vector(4, 5, 6);
+            Vector.print(v1 + v2);
+            Vector.print(2*v1);
+            Vector.print(v1 * 2);
+            if (v1 == v2)
+            {
+                Console.WriteLine("Равны v1 и v2");
+            }
+            if (v2 == v4)
+            {
+                Console.WriteLine("Равны v2 и v4");
+            }
+            if (v1 > v2)
+            {
+                Console.WriteLine("v1>v2");
+            }
+            if (v1 < v2)
+            {
+                Console.WriteLine("v1<v2");
+            }
+            Console.WriteLine("все");
+        }
+    }
+}
