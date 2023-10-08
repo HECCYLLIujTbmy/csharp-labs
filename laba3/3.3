@@ -1,0 +1,143 @@
+using System; 
+using System.Collections.Generic; 
+using System.Linq; 
+using System.Text; 
+using System.Threading.Tasks; 
+/*Создайте базовый класс Currency со свойством Value.  
+* Создайте 3 производных от Currency класса – CurrencyUSD, CurrencyEUR и CurrencyRUB со свойствами, 
+* соответствующими обменному курсу. В каждом из производных классов переопределите операторы преобразования типов таким образом,  
+* чтобы можно было явно или неявно преобразовать одну валюту в другую по курсу, заданному пользователем при запуске программы. 
+*/ 
+namespace laba_3._3
+{
+    public class Currency
+    {
+        public double value1 { get; set; }
+        public double value2 { get; set; }
+        public string name1 { get; set; }
+        public string name0 { get; set; }
+        public double value0 { get; set; }
+        public string name2 { get; set; }
+        public Currency(string name0, double value0, string name1, string name2, double value1, double value2)
+
+        {
+            this.name0 = name0;
+            this.name1 = name1;
+            this.name2 = name2;
+            this.value1 = value1;
+            this.value2 = value2;
+            this.value0 = value0;
+        }
+    }
+    public class CurrencyUSD : Currency
+    {
+
+        public CurrencyUSD(double value_eur, double value_rub) : base("USD", 1, "EUR", "RUB", value_eur, value_rub)
+        {
+
+            this.value1 = value_eur;
+            this.value2 = value_rub;
+        }
+        public void main_value() { }
+
+    }
+    public class CurrencyEUR : Currency
+    {
+
+        public CurrencyEUR(double value_usd, double value_rub) : base("EUR", 1, "RUB", "USD", value_rub, value_usd)
+        {
+            this.value2 = value_usd;
+            this.value1 = value_rub;
+        }
+
+    }
+    public class CurrencyRUB : Currency
+    {
+
+        public CurrencyRUB(double value_eur, double value_usd) : base("RUB", 1, "EUR", "USD", value_eur, value_usd)
+        {
+            this.value1 = value_eur;
+            this.value2 = value_usd;
+        }
+
+    }
+    public class Conversio
+    {
+        public void conv(string prefer, CurrencyEUR e, CurrencyRUB r, CurrencyUSD d)
+        {
+            if (prefer == "USD to EUR") // переход из доллара к евро 
+            {
+                double Euro_to_dollar = d.value0 / d.value1;
+                double Euro_to_rub = d.value1 / d.value2;
+
+            }
+            if (prefer == "USD to RUB") // переход из доллара к Рублю 
+            {
+                Console.WriteLine($"RUB_to_dollar {d.value0 / d.value2} RUB_to_eur {d.value1 / d.value2}");
+                double RUB_to_dollar = d.value0 / d.value2;
+                double RUB_to_eur = d.value1 / d.value2;
+
+            }
+            if (prefer == "EUR to USD")//переход из евро в доллары
+            {
+                Console.WriteLine($"USD_to_rub {e.value1 / e.value2} USD_to_eur {e.value0 / e.value1}");
+                double USD_to_rub = e.value1 / e.value2;//1 доллар это рублей
+                double USD_to_eur = e.value0/ e.value1;//1 доллар это евро
+            }
+            if (prefer == "EUR to RUB")//переход из евро в доллары
+            {
+                Console.WriteLine($"RUB_to_eur {e.value0 / e.value1} RUB_to_usd {e.value2 / e.value1}");
+                double RUB_to_eur = e.value0 / e.value1;//1 доллар это рублей
+                double RUB_to_usd = e.value2 / e.value1;//1 доллар это евро
+            }
+            if (prefer == "RUB to USD")//переход из рублей в доллары
+            {
+                Console.WriteLine($"USD_to_rub {r.value0 / r.value2} USD_to_eur {r.value1 / r.value2}");
+                double USD_to_rub = r.value0 / r.value2;
+                double USD_to_eur = r.value1 / r.value2;
+            }
+            if (prefer == "RUB to EUR")
+            {
+                Console.WriteLine($"EUR_to_rub {r.value1 / r.value0} EUR_to_usd {r.value2 / r.value1}");
+                double EUR_to_rub = r.value1 / r.value0;
+                double EUR_to_usd = r.value2 / r.value1;
+            }
+        }
+    }
+
+
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            string prefer = Console.ReadLine();
+            CurrencyUSD currencyUSD = null ;
+            CurrencyEUR currencyEUR = null;
+            CurrencyRUB currencyRUB = null;
+            if (prefer == "USD")
+            {
+                double rub_to_usd = Convert.ToDouble(Console.ReadLine());
+                double eur_to_usd = Convert.ToDouble(Console.ReadLine());
+                currencyUSD = new CurrencyUSD(eur_to_usd, rub_to_usd);
+
+            }
+            if (prefer == "EUR")
+            {
+                double rub_to_eur = Convert.ToDouble(Console.ReadLine());
+                double usd_to_eur = Convert.ToDouble(Console.ReadLine());
+                currencyEUR = new CurrencyEUR(usd_to_eur, rub_to_eur);
+            }
+            if (prefer == "RUB")
+            {
+                double eur_to_rub = Convert.ToDouble(Console.ReadLine());
+                double usd_to_rub = Convert.ToDouble(Console.ReadLine());
+                currencyRUB = new CurrencyRUB(eur_to_rub, usd_to_rub);
+
+            }
+            string prefer2 = Console.ReadLine();
+            Conversio con = new Conversio();
+            con.conv(prefer2,currencyEUR, currencyRUB, currencyUSD);
+        }
+    }
+}
