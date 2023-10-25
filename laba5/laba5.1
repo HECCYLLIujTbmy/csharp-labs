@@ -1,0 +1,150 @@
+using System;
+/*Создайте класс MyMatrix, представляющий матрицу m на n.
+Создайте конструктор, принимающий число строк и столбцов, заполняющий матрицу случайными числами в диапазоне, который пользователь вводит при запуске программы.
+Создайте метод Fill, перезаполняющий матрицу случайными значениями.
+Создайте метод ChangeSize, изменяющий число строк и/или столбцов с копированием значений существующей матрицы. Если новая матрица больше существующий, то метод должен дозаполнить новую матрицу случайными числами.
+
+
+Создайте метод ShowPartialy, принимающий в качестве параметров начальные и конечные значения строк и столбцов, значения матрицы внутри которых нужно вывести на консоль.
+Создайте метод Show, выводящий все значения матрицы на консоль.
+Создайте индексатор для матрицы вида this[int index1, int index2] с аксессором и мутатором*/
+class MyMatrix
+{
+    public int[,] matrix { get; set; }
+    public int stroka { get; set; }
+    public int stolbec { get; set; }
+    public int this[int stroka, int stolbec]
+    {
+            get
+            {
+                return matrix[stroka, stolbec];
+            }
+            set
+            {
+                matrix[stroka, stolbec] = value;
+            }      
+    }
+    public MyMatrix(int stroka, int stolbec)
+    {
+
+        int[,] matrix = new int[stroka, stolbec];
+
+        this.matrix = matrix;
+    }
+    public MyMatrix RandMatr(MyMatrix matr, int min, int max)
+    {
+        Random random = new Random();
+        for (int i = 0; i < matr.matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < matr.matrix.GetLength(1); j++)
+            {
+
+                matr[i, j] = random.Next(min, max);
+            }
+        }
+        return matr;
+    }
+    
+
+    public void Show(MyMatrix m)
+    {
+        for (int i = 0; i < m.matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < m.matrix.GetLength(1); j++)
+            {
+                Console.Write($"{m[i, j]}\t");
+            }
+            Console.WriteLine();
+        }
+        Console.WriteLine();
+
+    }
+    public MyMatrix Fill(MyMatrix m)
+    {
+        Random random = new Random();
+        int min = Convert.ToInt32(Console.ReadLine());
+        int max = Convert.ToInt32(Console.ReadLine());
+        for (int i = 0; i < m.matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < m.matrix.GetLength(1); j++)
+            {
+                m[i, j] = random.Next(min, max);
+            }
+        }
+        return m;
+    }
+    public MyMatrix ChangeSize(MyMatrix m)
+    {
+        Console.WriteLine($"Change size1, new0, new1");
+        int new_0 = Convert.ToInt32(Console.ReadLine());
+        int new_1 = Convert.ToInt32(Console.ReadLine());
+        Random random = new Random();
+        int min = Convert.ToInt32(Console.ReadLine());
+        int max = Convert.ToInt32(Console.ReadLine());
+        MyMatrix new_m = new MyMatrix(new_0, new_1);
+        if (new_0 < m.matrix.GetLength(0) || new_1 < m.matrix.GetLength(1))
+        {
+            Console.WriteLine($"new_0 < m.matrix.GetLength(0) || new_1 < m.matrix.GetLength(1)");
+            for (int i = 0; i < new_0; i++)
+            {
+                for (int j = 0; j < new_1; j++)
+                {
+                    new_m.matrix[i, j] = m.matrix[i, j];
+                }
+            }
+            return new_m;
+        }
+        if (new_0 > m.matrix.GetLength(0) || new_1 > m.matrix.GetLength(1))
+        {
+
+            for (int i = 0; i < new_0; i++)//заполняю новыми значениями
+            {
+                if (i >= m.matrix.GetLength(1))
+                {
+                    for (int alp = i; alp < new_0; alp++)
+                    {
+                        for (int bet = 0; bet < new_1; bet++)
+                        {
+                            new_m[alp, bet] = random.Next(min, max);
+                        }
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < new_1; j++)
+                    {
+                        if (j >= m.matrix.GetLength(1))
+                        {
+                            for (int alp = j; alp < new_0; alp++)
+                            {
+                                new_m[i, alp] = random.Next(min, max);
+                            }
+                        }
+                        else
+                        {
+                            new_m.matrix[i, j] = m.matrix[i, j];
+                        }
+                    }
+                }
+            }
+        }
+        return new_m;
+    }
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            int stroki1 = Convert.ToInt32(Console.ReadLine());
+            int stolbi1 = Convert.ToInt32(Console.ReadLine());
+            //int stroki2 = Convert.ToInt32(Console.ReadLine());
+            //int stolbi2 = Convert.ToInt32(Console.ReadLine());
+            int min = Convert.ToInt32(Console.ReadLine());
+            int max = Convert.ToInt32(Console.ReadLine());
+            MyMatrix m1 = new MyMatrix(stroki1, stolbi1);
+            m1.RandMatr(m1,min,max);
+            m1.Show(m1);
+            m1 = m1.ChangeSize(m1);
+            m1.Show(m1);
+        }
+    }
+}
