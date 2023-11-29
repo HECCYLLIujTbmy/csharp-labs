@@ -1,85 +1,91 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-class MyDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+namespace laba5._3
 {
-    private TKey[] keys;
-    private TValue[] values;
-    private int count;
-
-    public MyDictionary(int capacity)
+    class MyDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
-        keys = new TKey[capacity];
-        values = new TValue[capacity];
-        count = 0;
-    }
+        private TKey[] keys;
+        private TValue[] values;
+        private int count;
 
-    public void Add(TKey key, TValue value)
-    {
-        if (count < keys.Length)
+        public MyDictionary()
         {
+            keys = new TKey[10];  // Используйте размер, который вам кажется подходящим
+            values = new TValue[10];
+            count = 0;
+        }
+
+        public void Add(TKey key, TValue value)
+        {
+            // Увеличиваем размер массивов, если не хватает места
+            if (count == keys.Length)
+            {
+                Array.Resize(ref keys, keys.Length * 2);
+                Array.Resize(ref values, values.Length * 2);
+            }
+
             keys[count] = key;
             values[count] = value;
             count++;
         }
-        else
-        {
-            throw new InvalidOperationException("MyDictionary is full.");
-        }
-    }
 
-    public TValue this[TKey key]
-    {
-        get
+        public TValue this[TKey key]
+        {
+            get
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    if (EqualityComparer<TKey>.Default.Equals(keys[i], key))
+                    {
+                        return values[i];
+                    }
+                }
+
+                throw new KeyNotFoundException($"Key '{key}' not found.");
+            }
+        }
+
+        public int Count
+        {
+            get { return count; }
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             for (int i = 0; i < count; i++)
             {
-                if (object.Equals(keys[i], key))
-                {
-                    return values[i];
-                }
+                yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
             }
-            throw new KeyNotFoundException($"The key '{key}' was not found in MyDictionary.");
         }
-    }
 
-    public int Count
-    {
-        get { return count; }
-    }
-
-    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-    {
-        for (int i = 0; i < count; i++)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
+            return GetEnumerator();
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
+    class Program
     {
-        return GetEnumerator();
-    }
-}
-
-class Program
-{
-    static void Main()
-    {
-        MyDictionary<string, int> myDict = new MyDictionary<string, int>(5);
-
-        myDict.Add("one", 1);
-        myDict.Add("two", 2);
-        myDict.Add("three", 3);
-
-        Console.WriteLine($"Count: {myDict.Count}");
-
-        foreach (var pair in myDict)
+        static void Main()
         {
-            Console.WriteLine($"{pair.Key}: {pair.Value}");
-        }
+            MyDictionary<string, int> myDictionary = new MyDictionary<string, int>();
+            myDictionary.Add("One", 1);
+            myDictionary.Add("Two", 2);
+            myDictionary.Add("Three", 3);
 
-        Console.WriteLine("Value for 'two': " + myDict["two"]);
+            Console.WriteLine($"Count: {myDictionary.Count}");
+
+            foreach (var kvp in myDictionary)
+            {
+                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+            }
+
+            Console.WriteLine($"Value for 'Two': {myDictionary["Two"]}");
+        }
     }
 }
