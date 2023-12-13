@@ -1,0 +1,72 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        List<string> tickers = ReadTickersFromFile("ticker.txt");
+
+        foreach (var ticker in tickers)
+        {
+            Task<decimal> averagePriceTask = CalculateAveragePriceAsync(ticker);
+            await ProcessAveragePriceAsync(ticker, await averagePriceTask);
+        }
+    }
+
+    static List<string> ReadTickersFromFile(string filePath)
+    {
+        return File.ReadAllLines(filePath).ToList();
+    }
+
+    static async Task<decimal> CalculateAveragePriceAsync(string ticker)
+    {
+        var startDate = DateTimeOffset.UtcNow.AddYears(-1).ToUnixTimeSeconds();
+        var endDate = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        string apiUrl = $"https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={startDate}&period2={endDate}&interval=1d&events=history&includeAdjustedClose=true";
+
+        using (HttpClient client = new HttpClient())
+        {
+            string csvData = await client.GetStringAsync(apiUrl);
+
+            string[] lines = csvData.Split('\n');
+            decimal total = 0;
+            int count = 0;
+
+            foreach (var line in lines.Skip(1)) // Skip header
+            {
+                string[] values = line.Split(',');
+
+                if (values.Length >= 5)
+                {
+                    decimal high = decimal.Parse(values[2], CultureInfo.InvariantCulture);
+                    decimal low = decimal.Parse(values[3], CultureInfo.InvariantCulture);
+                    decimal dailyAverage = (high + low) / 2;
+
+                    total += dailyAverage;
+                    count++;
+                }
+            }
+
+            return count > 0 ? total / count : 0;
+        }
+    }
+
+    static async Task ProcessAveragePriceAsync(string ticker, decimal averagePrice)
+    {
+        string result = $"{ticker}:{averagePrice}";
+
+        // Ensure thread-safe access to the file
+        using (var writerLock = new StreamWriter("output.txt", true))
+        {
+            await writerLock.WriteLineAsync(result);
+        }
+
+        Console.WriteLine(result);
+    }
+}
