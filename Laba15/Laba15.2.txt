@@ -1,0 +1,84 @@
+using System;
+using System.IO;
+using Newtonsoft.Json;
+
+/*
+ Во второй программе реализован класс MyLogger, который использует паттерн "Репозиторий" для записи логов в текстовый файл 
+и, по желанию, в JSON-файл или в базу данных. Давайте рассмотрим ключевые компоненты программы:
+
+LogRepository: Этот класс представляет репозиторий для хранения логов. 
+В данном случае, он просто добавляет новую запись в текстовый файл в формате JSON. Метод AppendLogEntry получает объект LogEntry, сериализует его в JSON и добавляет в файл.
+
+LogEntry: Этот класс представляет запись лога. 
+В данном случае, у записи есть временная метка (Timestamp) и текстовое сообщение (Message).
+
+MyLogger: Это основной класс, который использует репозиторий для записи логов. 
+Метод Log принимает текстовое сообщение, создает новую запись лога и передает ее в репозиторий.
+
+Пример использования в Program: Создается экземпляр MyLogger с указанием пути к текстовому файлу логов ("C:\\YourLogFilePath\\log.txt"). 
+Затем вызывается метод Log с текстовым сообщением ("This is a log message."). Это пример использования класса MyLogger для записи логов.
+Примечание:
+В данном примере, логи сохраняются в текстовом файле в формате JSON. Вы можете дополнить функциональность, чтобы поддерживать другие форматы или добавить сохранение в базу данных, если это необходимо для вашего проекта.
+Обратите внимание, что для работы с JSON используется библиотека Newtonsoft.Json, которую нужно добавить в проект.
+Этот пример демонстрирует основные концепции паттерна "Репозиторий" и предоставляет простую реализацию класса для логирования.*/
+// Репозиторий для хранения логов
+public class LogRepository
+{
+    private readonly string logFilePath;
+
+    public LogRepository(string filePath)
+    {
+        logFilePath = filePath;
+    }
+
+    public void AppendLogEntry(LogEntry entry)
+    {
+        string json = JsonConvert.SerializeObject(entry);
+
+        using (StreamWriter writer = File.AppendText(logFilePath))
+        {
+            writer.WriteLine(json);
+        }
+    }
+}
+
+// Класс для представления записи лога
+public class LogEntry
+{
+    public DateTime Timestamp { get; set; }
+    public string Message { get; set; }
+}
+
+// Класс MyLogger
+public class MyLogger
+{
+    private readonly LogRepository logRepository;
+
+    public MyLogger(string filePath)
+    {
+        logRepository = new LogRepository(filePath);
+    }
+
+    public void Log(string message)
+    {
+        LogEntry entry = new LogEntry
+        {
+            Timestamp = DateTime.Now,
+            Message = message
+        };
+
+        logRepository.AppendLogEntry(entry);
+    }
+}
+
+// Пример использования
+class Program
+{
+    static void Main()
+    {
+        MyLogger logger = new MyLogger("C:\\Users\\v_e_s\\Desktop\\test\\test.txt");
+        logger.Log("This is a log message.");
+
+        Console.ReadLine(); // Для того чтобы консольное приложение не завершалось сразу
+    }
+}

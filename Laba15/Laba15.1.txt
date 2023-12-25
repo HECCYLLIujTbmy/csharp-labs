@@ -1,0 +1,88 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+/*
+ В первом задании реализован простой аналог класса `FileSystemWatcher` с использованием паттерна "Наблюдатель" (Observer) и таймера для периодической проверки состояния директории.
+
+Давайте разберем ключевые компоненты:
+
+1. **IObserver и FileObserver**: Интерфейс `IObserver` определяет метод `Update`, который вызывается при изменении состояния. Класс `FileObserver` реализует этот интерфейс и определяет, как реагировать на изменения (в данном случае, выводит сообщение в консоль).
+
+2. **FileWatcher**: Это класс-наблюдатель, который содержит список подписчиков (наблюдателей), методы для добавления/удаления подписчиков, и метод `CheckDirectory`, который вызывается по таймеру. Внутри `CheckDirectory` происходит проверка состояния директории, и если есть изменения, то вызываются методы наблюдателей.
+
+3. **Пример использования в Program**: Создается экземпляр `FileWatcher` для определенной директории (`"C:\\YourDirectoryPath"`). Затем создается экземпляр `FileObserver`, который добавляется в список подписчиков `FileWatcher`. Теперь, при каждой проверке директории, `FileObserver` получит уведомление об изменениях и выведет сообщение в консоль.
+
+4. **Timer**: В конструкторе `FileWatcher` создается объект `Timer`, который запускает метод `CheckDirectory` каждые 5 секунд (или другой период времени, указанный в `TimeSpan.FromSeconds(5)`).
+
+Этот пример демонстрирует основные концепции паттерна "Наблюдатель" и простой механизм проверки состояния директории по таймеру вместо использования реального `FileSystemWatcher`.*/
+// Интерфейс для наблюдателя
+public interface IObserver
+{
+    void Update(string fileName);
+}
+
+// Класс-наблюдаемый
+public class FileWatcher
+{
+    private readonly List<IObserver> observers = new List<IObserver>();
+    private readonly string directoryPath;
+    private readonly Timer timer;
+
+    public FileWatcher(string path)
+    {
+        directoryPath = path;
+        timer = new Timer(CheckDirectory, null, TimeSpan.Zero, TimeSpan.FromSeconds(5)); // Таймер каждые 5 секунд
+    }
+
+    public void AddObserver(IObserver observer)
+    {
+        observers.Add(observer);
+    }
+
+    public void RemoveObserver(IObserver observer)
+    {
+        observers.Remove(observer);
+    }
+
+    private void CheckDirectory(object state)
+    {
+        string[] files = Directory.GetFiles(directoryPath);
+
+        foreach (var file in files)
+        {
+            NotifyObservers(file);
+        }
+    }
+
+    private void NotifyObservers(string fileName)
+    {
+        foreach (var observer in observers)
+        {
+            observer.Update(fileName);
+        }
+    }
+}
+
+// Класс-наблюдатель
+public class FileObserver : IObserver
+{
+    public void Update(string fileName)
+    {
+        Console.WriteLine($"File {fileName} has been changed.");
+    }
+}
+
+// Пример использования
+class Program
+{
+    static void Main()
+    {
+        FileWatcher fileWatcher = new FileWatcher("C:\\Users\\v_e_s\\Desktop\\test");
+
+        FileObserver fileObserver = new FileObserver();
+        fileWatcher.AddObserver(fileObserver);
+
+        Console.ReadLine(); // Для того чтобы консольное приложение не завершалось сразу
+    }
+}

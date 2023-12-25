@@ -1,0 +1,80 @@
+using System;
+using System.Threading;
+/*
+ В третьей программе реализован класс `SingleRandomizer`, представляющий генератор случайных чисел с использованием паттерна "Одиночка" (Singleton). Давайте рассмотрим ключевые компоненты программы:
+
+1. **SingleRandomizer**: Этот класс представляет генератор случайных чисел и реализует паттерн "Одиночка". Важно отметить, что генератор случайных чисел (`Random`) является потокобезопасным только в том случае, если обращения к нему синхронизированы. В этой реализации используется блокировка `lock`, чтобы предотвратить возможные проблемы при использовании из разных потоков.
+
+2. **Instance (Свойство)**: Это статическое свойство, представляющее экземпляр класса `SingleRandomizer`. Оно реализовано с использованием двойной проверки `null` для обеспечения потокобезопасности при создании одного и только одного экземпляра.
+
+3. **NextRandom()**: Этот метод генерирует следующее случайное число с использованием экземпляра класса `Random`. Метод защищен блокировкой `lock`, чтобы обеспечить безопасность при использовании из разных потоков.
+
+4. **Пример использования в Program**: Создаются два потока (`thread1` и `thread2`), каждый из которых запускает метод `NextRandom()` для получения следующего случайного числа. Оба потока используют один и тот же экземпляр `SingleRandomizer`. Результат выводится в консоль.
+
+5. **lockObject (Объект блокировки)**: Статический объект используется для блокировки в методе `NextRandom()`. Это общее средство синхронизации, чтобы гарантировать, что операции с экземпляром `Random` выполняются атомарно.
+
+Пример демонстрирует, как паттерн "Одиночка" гарантирует, что у нас есть только один экземпляр `SingleRandomizer`, и как этот экземпляр может быть безопасно использован из разных потоков.*/
+public class SingleRandomizer
+{
+    private static SingleRandomizer instance;
+    private static readonly object lockObject = new object();
+    private readonly Random random;
+
+    private SingleRandomizer()
+    {
+        random = new Random();
+    }
+
+    public static SingleRandomizer Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                lock (lockObject)
+                {
+                    if (instance == null)
+                    {
+                        instance = new SingleRandomizer();
+                    }
+                }
+            }
+            return instance;
+        }
+    }
+
+    public int NextRandom()
+    {
+        lock (lockObject)
+        {
+            return random.Next();
+        }
+    }
+}
+
+// Пример использования из разных потоков
+class Program
+{
+    static void Main()
+    {
+        Thread thread1 = new Thread(() =>
+        {
+            SingleRandomizer randomizer1 = SingleRandomizer.Instance;
+            Console.WriteLine($"Thread 1: {randomizer1.NextRandom()}");
+        });
+
+        Thread thread2 = new Thread(() =>
+        {
+            SingleRandomizer randomizer2 = SingleRandomizer.Instance;
+            Console.WriteLine($"Thread 2: {randomizer2.NextRandom()}");
+        });
+
+        thread1.Start();
+        thread2.Start();
+
+        thread1.Join();
+        thread2.Join();
+
+        Console.ReadLine(); // Для того чтобы консольное приложение не завершалось сразу
+    }
+}
