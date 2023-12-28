@@ -1,0 +1,30 @@
+namespace Lab07_Library;
+
+[MyComment("Inheritable class Cow")] //наследуемый класс
+public class Cow : Animal
+{
+    public Cow(string country)
+    {
+        Country = country;
+        HideFromOtherAnimals = true;
+        Name = "Cow";
+        WhatAnimal = eClassificationAnimal.Herbivores;
+    }
+}
+namespace Lab07_Library;
+
+[MyComment("Food classification")]
+public enum eFavoriteFood
+{
+    Meat,
+    Plants,
+    Everything
+}
+namespace Lab07_Library;
+
+public class MyComment : Attribute //наследуемся от встроенного класса
+{
+    public string Comment { get; }
+    public MyComment() { }
+    public MyComment(string comment) => Comment = comment;
+}
