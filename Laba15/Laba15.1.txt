@@ -2,87 +2,89 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-/*
- В первом задании реализован простой аналог класса `FileSystemWatcher` с использованием паттерна "Наблюдатель" (Observer) и таймера для периодической проверки состояния директории.
+using System.Linq;
 
-Давайте разберем ключевые компоненты:
-
-1. **IObserver и FileObserver**: Интерфейс `IObserver` определяет метод `Update`, который вызывается при изменении состояния. Класс `FileObserver` реализует этот интерфейс и определяет, как реагировать на изменения (в данном случае, выводит сообщение в консоль).
-
-2. **FileWatcher**: Это класс-наблюдатель, который содержит список подписчиков (наблюдателей), методы для добавления/удаления подписчиков, и метод `CheckDirectory`, который вызывается по таймеру. Внутри `CheckDirectory` происходит проверка состояния директории, и если есть изменения, то вызываются методы наблюдателей.
-
-3. **Пример использования в Program**: Создается экземпляр `FileWatcher` для определенной директории (`"C:\\YourDirectoryPath"`). Затем создается экземпляр `FileObserver`, который добавляется в список подписчиков `FileWatcher`. Теперь, при каждой проверке директории, `FileObserver` получит уведомление об изменениях и выведет сообщение в консоль.
-
-4. **Timer**: В конструкторе `FileWatcher` создается объект `Timer`, который запускает метод `CheckDirectory` каждые 5 секунд (или другой период времени, указанный в `TimeSpan.FromSeconds(5)`).
-
-Этот пример демонстрирует основные концепции паттерна "Наблюдатель" и простой механизм проверки состояния директории по таймеру вместо использования реального `FileSystemWatcher`.*/
-// Интерфейс для наблюдателя
-public interface IObserver
+namespace Lab15
 {
-    void Update(string fileName);
-}
+   
 
-// Класс-наблюдаемый
-public class FileWatcher
-{
-    private readonly List<IObserver> observers = new List<IObserver>();
-    private readonly string directoryPath;
-    private readonly Timer timer;
+    public delegate void DirectoryChangedEventHandler(object sender, DirectoryChangedEventArgs args); // делегат для обработки событий изменения директории
 
-    public FileWatcher(string path)
+    public class DirectorySystemWatcher // основной класс для отслеживания изменений в директории
     {
-        directoryPath = path;
-        timer = new Timer(CheckDirectory, null, TimeSpan.Zero, TimeSpan.FromSeconds(5)); // Таймер каждые 5 секунд
-    }
+        private string directoryPath; // путь к директории
+        public Timer timer; //управление временем внутри класса
+        private List<string> currentFiles; //список для хранения имён файлов, отслеживаемых в директории
 
-    public void AddObserver(IObserver observer)
-    {
-        observers.Add(observer);
-    }
+        public event DirectoryChangedEventHandler FileChanged; //уведомления об изменениях
 
-    public void RemoveObserver(IObserver observer)
-    {
-        observers.Remove(observer);
-    }
-
-    private void CheckDirectory(object state)
-    {
-        string[] files = Directory.GetFiles(directoryPath);
-
-        foreach (var file in files)
+        public DirectorySystemWatcher(string directoryPath)
         {
-            NotifyObservers(file);
+            this.directoryPath = directoryPath;
+            currentFiles = Directory.GetFiles(directoryPath).ToList(); //получаем файлы в директории
+
+            timer = new Timer(CheckDirectory, null, TimeSpan.Zero, TimeSpan.FromSeconds(1)); // таймер вызывает метод CheckDirectory каждую секунду и повторяет вызов каждую секунду
+                                                                                             // null вторым параметром указывает на вызов метода CheckDirectory.
+        }
+
+        public void CheckDirectory(object state) //метод проверки директории на изменения
+        {
+            var files = Directory.GetFiles(directoryPath); //получение списка файлов
+
+            foreach (var file in files) //перебор всех файлов
+            {
+                if (currentFiles.Contains(file)) //проверка на содержание
+                {
+                    continue;
+                }
+
+                currentFiles.Add(file); // добавление нового файла в список
+
+                OnFileChanged(file); //вызов события, чтобы оповестить об изменении
+            }
+
+            for (int i = currentFiles.Count - 1; i >= 0; i--)
+            {
+                var file = currentFiles[i]; //получение списка файлов
+                if (!File.Exists(file)) //проверка на существование
+                {
+                    currentFiles.RemoveAt(i); //удаление из списка, если его нет в директории
+                    OnFileChanged(file); //вызов события, чтобы оповестить об изменении
+                }
+            }
+        }
+
+        protected virtual void OnFileChanged(string fileName) //уведомление об изменении
+        {
+            FileChanged?.Invoke(this, new DirectoryChangedEventArgs { FileName = fileName });
         }
     }
 
-    private void NotifyObservers(string fileName)
+    public class DirectoryChangeHandler //обработка событий (изменение файлов в дир-ии)
     {
-        foreach (var observer in observers)
+        public void OnFileChanged(object sender, DirectoryChangedEventArgs args)
         {
-            observer.Update(fileName);
+            Console.WriteLine($"File {args.FileName} has been changed");
         }
     }
-}
-
-// Класс-наблюдатель
-public class FileObserver : IObserver
-{
-    public void Update(string fileName)
+    public class DirectoryChangedEventArgs : EventArgs // наследуемся от класса EventArgs
     {
-        Console.WriteLine($"File {fileName} has been changed.");
+        public string FileName { get; set; } // храним имя файла, вызвавшего событие
     }
-}
-
-// Пример использования
-class Program
-{
-    static void Main()
+    public class Program
     {
-        FileWatcher fileWatcher = new FileWatcher("C:\\Users\\v_e_s\\Desktop\\test");
+        public static void Main(string[] args)
+        {
+            var directorySystemWatcher = new DirectorySystemWatcher("C:\\Users\\Нина\\Desktop\\test");
 
-        FileObserver fileObserver = new FileObserver();
-        fileWatcher.AddObserver(fileObserver);
+            var directoryChangeHandler = new DirectoryChangeHandler();
 
-        Console.ReadLine(); // Для того чтобы консольное приложение не завершалось сразу
+            directorySystemWatcher.FileChanged += directoryChangeHandler.OnFileChanged; //подписка на событие
+
+            while (true)
+            {
+                directorySystemWatcher.CheckDirectory(directorySystemWatcher.timer); //бесконечный мониторинг
+            }
+        }
     }
 }
